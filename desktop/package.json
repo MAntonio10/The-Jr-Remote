@@ -1,0 +1,56 @@
+{
+  "name": "the-jr",
+  "version": "1.0.0",
+  "description": "El Senior y The Jr: escritorio remoto propio",
+  "main": "main.js",
+  "scripts": {
+    "test": "node --test test.js",
+    "start": "electron .",
+    "build:helper": "\"%WINDIR%\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe\" /nologo /target:winexe /platform:x64 /out:helper/out/TheJrHelper.exe /reference:System.Drawing.dll,System.ServiceProcess.dll,System.Web.Extensions.dll helper/TheJrHelper.cs",
+    "dist": "electron-builder --win nsis"
+  },
+  "keywords": [],
+  "author": "The Jr",
+  "license": "AGPL-3.0-only",
+  "type": "commonjs",
+  "dependencies": {
+    "@fontsource/atkinson-hyperlegible-mono": "^5.3.0",
+    "@fontsource/atkinson-hyperlegible-next": "^5.3.0",
+    "@nut-tree-fork/nut-js": "^4.2.6"
+  },
+  "devDependencies": {
+    "electron": "^44.7.2",
+    "electron-builder": "26.17.0"
+  },
+  "productName": "The Jr",
+  "build": {
+    "appId": "com.thejr.desktop",
+    "productName": "The Jr",
+    "files": [
+      "**/*",
+      "!test.js",
+      "!dist/**"
+    ],
+    "asarUnpack": [
+      "helper/out/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false
+    },
+    "win": {
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "The Jr",
+      "include": "installer.nsh"
+    }
+  }
+}

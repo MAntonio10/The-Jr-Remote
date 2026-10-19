@@ -1,0 +1,19 @@
+# /etc/systemd/system/sistema-remoto.service
+[Unit]
+Description=Sistema remoto: servidor de señalización
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/sistema-remoto/server
+ExecStart=/usr/bin/node index.js
+Environment=HOST=127.0.0.1
+Environment=PORT=8080
+Environment=TURN_HOST=turn.TU_DOMINIO
+Environment=TURN_SECRET=CAMBIA_ESTO_POR_UN_SECRETO_LARGO
+Environment=DB_FILE=/var/lib/sistema-remoto/agents.json
+StateDirectory=sistema-remoto
+DynamicUser=yes
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

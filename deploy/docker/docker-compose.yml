@@ -1,0 +1,38 @@
+# Uso (en el VPS, desde la raíz del proyecto):
+#   cp deploy/docker/.env.example deploy/docker/.env   # y edita los valores
+#   docker compose -f deploy/docker/docker-compose.yml up -d --build
+# Los tres usan la red del VPS (host): coturn necesita su rango UDP y nginx el 443.
+# Los certificados los sigue pidiendo certbot en el VPS (ver README); no van en contenedor.
+services:
+  senal:
+    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    network_mode: host
+    restart: always
+    environment:
+      HOST: 127.0.0.1
+      PORT: 8080
+      TURN_HOST: turn.${DOMINIO}
+      TURN_SECRET: ${TURN_SECRET}
+      DB_FILE: /data/agents.json
+    volumes: ["datos:/data"]
+    # shortcut: el volumen lo crea root; si "node" no puede escribir, quita "USER node" del Dockerfile
+  nginx:
+    image: nginx:1.27-alpine
+    network_mode: host
+    restart: always
+    depends_on: [senal, coturn]
+    volumes:
+      - ./nginx.conf:/etc/nginx/templates/nginx.conf.template:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    environment: { DOMINIO: "${DOMINIO}" }
+    command: ["/bin/sh", "-c", "envsubst '$$DOMINIO' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"]
+  coturn:
+    image: coturn/coturn:4.6
+    network_mode: host
+    restart: always
+    volumes:
+      - ./turnserver.conf:/etc/turnserver.conf:ro
+      - /etc/coturn:/etc/coturn:ro
+    command: ["-c", "/etc/turnserver.conf", "--static-auth-secret=${TURN_SECRET}", "--realm=turn.${DOMINIO}", "--external-ip=${IP_PUBLICA}"]
+volumes:
+  datos:

@@ -1,0 +1,17 @@
+{
+  "name": "the-jr-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test test.js",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "type": "commonjs",
+  "dependencies": {
+    "ws": "^8.22.0"
+  }
+}

@@ -1,0 +1,5 @@
+node_modules/
+server/agents.json
+desktop/dist/
+.claude/
+desktop/helper/out/

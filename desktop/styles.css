@@ -1,0 +1,43 @@
+@import url('node_modules/@fontsource/atkinson-hyperlegible-next/400.css');
+@import url('node_modules/@fontsource/atkinson-hyperlegible-next/700.css');
+@import url('node_modules/@fontsource/atkinson-hyperlegible-mono/400.css');
+
+:root {
+  --ink: #1D2733; --paper: #F7F8F9; --rack: #E6E9EC; --rule: #D5DADF; --muted: #4E5A67;
+  --cable: #D8A017; --fault: #B23A0E; --night: #262D36; --idle: #9AA4AE;
+  --sans: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --mono: 'Atkinson Hyperlegible Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--sans); color: var(--ink); background: var(--paper); }
+h2 { margin: 0; font-size: 17px; }
+[hidden] { display: none !important; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.55; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.ghost { height: 34px; padding: 0 12px; border: 1.5px solid var(--ink); border-radius: 6px; background: transparent; font-size: 14px; }
+.primary { height: 44px; padding: 0 20px; border: 0; border-radius: 6px; background: var(--ink); color: #fff; font-size: 15px; font-weight: 700; }
+.label { font-size: 14px; color: var(--muted); font-weight: 400; margin: 0; }
+.muted { color: var(--muted); }
+.code { font-size: 34px; line-height: 1.1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); font-size: 19px; letter-spacing: 0.06em; }
+
+/* Ruta Equipo — Servidor — Remoto: cada tramo dice si funciona */
+.route { display: flex; align-items: flex-start; gap: 8px; }
+.node { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; }
+.node svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.seg { flex: 1; margin-top: 11px; height: 0; border-top: 3px dashed var(--idle); }
+.seg.ok { border-top: 3px solid var(--ink); }
+.seg.live { height: 6px; margin-top: 9px; border: 1.5px solid var(--ink); border-radius: 3px; background: var(--cable); }
+.seg.fail { border-top-color: var(--fault); }
+.node.fail { color: var(--fault); }
+
+/* Glifo corto de estado en las listas */
+.dot { display: inline-flex; align-items: center; gap: 0; }
+.dot::before, .dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.dot i { width: 14px; border-top: 2.5px solid var(--ink); }
+.dot.fail i { border-top: 2.5px dashed var(--fault); }
+.dot.fail::after { background: transparent; box-shadow: inset 0 0 0 2px var(--fault); }
+.fail-text { color: var(--fault); }

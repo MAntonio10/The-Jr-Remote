@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src ws: wss:; style-src 'self' 'unsafe-inline'">
+<title>The Jr</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { height: 100vh; display: flex; flex-direction: column; }
+  .band { background: var(--cable); padding: 18px 28px; display: flex; align-items: center; gap: 16px; }
+  .band div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .band strong { font-size: 20px; }
+  .band .ghost { height: 44px; }
+  .fileline { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
+  .link { border: 0; background: none; padding: 0; text-decoration: underline; font-size: 14px; }
+  .cols { flex: 1; display: flex; min-height: 0; }
+  .this { width: 330px; padding: 28px; display: flex; flex-direction: column; gap: 22px; background: var(--rack); }
+  .brand { align-self: flex-start; border-radius: 50%; }
+  .other { flex: 1; padding: 28px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .head .ghost { height: 44px; display: flex; align-items: center; gap: 8px; }
+  .head svg, .dlg-head svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .field { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .row { display: flex; align-items: center; gap: 8px; width: 100%; }
+  #myPass { max-width: 100%; overflow-wrap: anywhere; letter-spacing: 0.02em; }
+  .status { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .status strong { font-size: 16px; }
+  .status span { font-size: 13px; }
+  .check { display: flex; align-items: center; gap: 10px; font-size: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+  .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); }
+  form { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; align-items: end; }
+  form label { font-size: 14px; color: var(--muted); }
+  form input, .dlg input { height: 44px; padding: 0 12px; border: 1.5px solid var(--ink); border-radius: 6px; background: #fff; min-width: 0; }
+  #code { grid-column: 1 / -1; height: 52px; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  form .primary { grid-column: 1 / -1; height: 48px; margin-top: 8px; }
+  .passbox { display: flex; gap: 8px; min-width: 0; position: relative; }
+  .passbox input { flex: 1; }
+  .passbox input#pass { padding-right: 42px; }
+  .passbox .ghost { height: 44px; }
+  /* Ojo para mostrar/ocultar, dentro del propio campo */
+  .passbox .eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); height: 32px; width: 32px; padding: 0; border: 0; background: none; color: #5A6672; display: grid; place-items: center; cursor: pointer; border-radius: 6px; }
+  .passbox .eye:hover { background: var(--rule); }
+  #formError { grid-column: 1 / -1; margin: 0; font-size: 14px; }
+  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  li { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+  li .info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  li .name { font-size: 16px; font-weight: 700; }
+  li .line { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .empty { font-size: 14px; color: var(--muted); padding: 12px 0; }
+
+  /* Configuración */
+  dialog { width: min(440px, 100vw - 32px); border: 0; border-radius: 8px; padding: 28px; background: var(--paper); color: var(--ink); }
+  dialog::backdrop { background: rgb(29 39 51 / 0.45); }
+  .dlg { display: flex; flex-direction: column; gap: 20px; }
+  .dlg-head { display: flex; align-items: center; justify-content: space-between; }
+  .dlg-head h2 { font-size: 22px; }
+  .dlg-head .ghost { width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .dlg select { height: 44px; padding: 0 10px; border: 1.5px solid var(--ink); border-radius: 6px; background: #fff; font: inherit; color: inherit; }
+  .about { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid var(--rule); }
+  .about-id { display: flex; align-items: center; gap: 14px; }
+  .about-id img { border-radius: 50%; }
+  .about-id div { display: flex; flex-direction: column; gap: 2px; }
+  .about-id strong { font-size: 20px; }
+  .about .ghost { align-self: flex-start; height: 44px; }
+  .about p { margin: 0; font-size: 14px; }
+  .about .primary { align-self: flex-start; }
+  .dlg .field .ghost { height: 44px; }
+  .dlg .field p { margin: 0; font-size: 13px; }
+  #askDlg { border-top: 8px solid var(--cable); }
+  #askDlg h2 { font-size: 20px; line-height: 1.25; }
+  #askDetail { margin: 0; font-size: 15px; }
+  .dlg-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .dlg-actions button { height: 44px; }
+</style>
+</head>
+<body>
+<div id="band" class="band" hidden>
+  <div>
+    <strong id="bandTitle" data-i18n="bandTitle">The Jr está al mando de esta PC</strong><span id="bandInfo"></span>
+    <span class="fileline" aria-live="polite"><span id="fileInfo"></span><button id="showFile" class="link" data-i18n="showFile" hidden>Ver en carpeta</button></span>
+  </div>
+  <button id="sendFile" class="ghost" data-i18n="sendFileToJr">Enviar archivo a The Jr</button>
+  <button id="cut" class="primary" data-i18n="cut">Cortar conexión</button>
+  <input id="filePick" type="file" multiple hidden>
+</div>
+<main class="cols">
+  <section class="this">
+    <img class="brand" src="the-jr.svg" alt="The Jr" width="72" height="72">
+    <h2 data-i18n="seniorTitle">Este equipo es El Senior</h2>
+    <div class="field">
+      <span class="label" data-i18n="code">Código</span>
+      <span id="myId" class="code"></span>
+      <button id="copy" class="ghost" data-i18n="copyBoth">Copiar código y contraseña</button>
+    </div>
+    <div class="field">
+      <span class="label" data-i18n="password">Contraseña</span>
+      <span id="myPass" class="mono">••••-••••</span>
+      <div class="row">
+        <button id="show" class="ghost" data-i18n="show">Mostrar</button>
+        <button id="newPass" class="ghost" data-i18n="change">Cambiar</button>
+      </div>
+    </div>
+    <div class="status" role="status">
+      <div class="route" aria-hidden="true">
+        <div class="node"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"></rect><path d="M8 20h8M12 16v4"></path></svg><span data-i18n="thisPc">Esta PC</span></div>
+        <div id="seg1" class="seg"></div>
+        <div id="nodeServer" class="node"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="1.5"></rect><rect x="4" y="13" width="16" height="7" rx="1.5"></rect><path d="M8 7.5h.01M8 16.5h.01"></path></svg><span data-i18n="server">Servidor</span></div>
+        <div id="seg2" class="seg"></div>
+        <div class="node muted"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"></rect><path d="M11 18.5h2"></path></svg>The Jr</div>
+      </div>
+      <strong id="stTitle" data-i18n="connectingServer">Conectando con el servidor…</strong>
+      <span id="stText" class="muted"></span>
+    </div>
+    <label class="check"><input type="checkbox" id="ask"><span data-i18n="askBefore">Preguntar antes de aceptar una conexión</span></label>
+  </section>
+
+  <section class="other">
+    <div class="head">
+      <h2 data-i18n="otherTitle">Ser The Jr de otro equipo</h2>
+      <button id="openSettings" class="ghost" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span data-i18n="settings">Configuración</span>
+      </button>
+    </div>
+    <form id="form" novalidate>
+      <label for="code" style="grid-column: 1 / -1" data-i18n="seniorCode">Código de El Senior</label>
+      <input id="code" inputmode="numeric" autocomplete="off" placeholder="000 000 000">
+      <label for="pass" data-i18n="password">Contraseña</label>
+      <label for="name" data-i18n="saveAs">Guardar como (opcional)</label>
+      <div class="passbox"><input id="pass" type="password" autocomplete="off"><button type="button" id="passShow" class="eye" aria-controls="pass" aria-pressed="false" aria-label="Mostrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <input id="name" placeholder="PC Oficina" data-i18n-placeholder="namePlaceholder" autocomplete="off">
+      <p id="formError" class="fail-text" hidden></p>
+      <button class="primary" data-i18n="connect">Conectar</button>
+    </form>
+    <h2 class="label" data-i18n="myDevices">Mis equipos</h2>
+    <ul id="saved"></ul>
+  </section>
+</main>
+
+<dialog id="settings" aria-labelledby="settingsTitle">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2 id="settingsTitle" data-i18n="settings">Configuración</h2>
+      <button id="closeSettings" class="ghost" data-i18n-title="close" title="Cerrar" aria-labelledby="closeLabel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg><span id="closeLabel" data-i18n="close" hidden>Cerrar</span>
+      </button>
+    </div>
+    <div class="field">
+      <label class="label" for="serverUrl" data-i18n="server">Servidor</label>
+      <input id="serverUrl" type="url" autocomplete="off" spellcheck="false" placeholder="wss://remoto.tudominio.com" aria-describedby="serverInfo" style="width: 100%">
+      <p id="serverInfo" class="muted" aria-live="polite" data-i18n="serverHint">Es el servidor que une tus equipos. Usa la misma dirección en todos, por ejemplo wss://remoto.tudominio.com.</p>
+      <button id="serverSave" class="ghost" data-i18n="saveServer">Guardar servidor</button>
+    </div>
+    <div class="field">
+      <label class="label" for="lang" data-i18n="language">Idioma</label>
+      <select id="lang"><option value="es" lang="es">Español</option><option value="en" lang="en">English</option></select>
+    </div>
+    <div class="field">
+      <label class="label" for="customPass" data-i18n="customPass">Contraseña para entrar a este equipo</label>
+      <div class="passbox" style="width: 100%"><input id="customPass" type="password" maxlength="64" autocomplete="new-password" aria-describedby="customInfo"><button type="button" id="customShow" class="ghost" aria-controls="customPass" aria-pressed="false" data-i18n="show">Mostrar</button></div>
+      <p id="customInfo" class="muted" aria-live="polite" data-i18n="customHint">Mínimo 8 caracteres. Reemplaza la contraseña generada.</p>
+      <button id="customSave" class="ghost" data-i18n="savePass">Guardar contraseña</button>
+    </div>
+    <section class="about" aria-labelledby="aboutTitle">
+      <h2 id="aboutTitle" class="label" data-i18n="about">Acerca de</h2>
+      <div class="about-id">
+        <img src="the-jr.svg" alt="" width="56" height="56">
+        <div><strong>The Jr</strong><span id="version" class="muted"></span></div>
+      </div>
+      <button id="repo" class="link" data-i18n="repo" hidden>Repositorio en GitHub</button>
+      <p id="noRepo" class="muted" data-i18n="noRepo" hidden>Todavía no hay un repositorio configurado.</p>
+      <button id="checkUpd" class="ghost" data-i18n="checkUpdates">Buscar actualizaciones</button>
+      <p id="updInfo" aria-live="polite"></p>
+      <button id="download" class="primary" data-i18n="download" hidden>Descargar</button>
+    </section>
+  </div>
+</dialog>
+<dialog id="askDlg" aria-labelledby="askTitle" aria-describedby="askDetail">
+  <div class="dlg">
+    <div class="about-id">
+      <img src="the-jr.svg" alt="" width="56" height="56">
+      <h2 id="askTitle" data-i18n="askMessage">The Jr pide permiso para poseer tu equipo</h2>
+    </div>
+    <p id="askDetail"></p>
+    <div class="dlg-actions">
+      <button id="askNo" class="ghost" data-i18n="reject" autofocus>Rechazar</button>
+      <button id="askYes" class="primary" data-i18n="allow">Permitir</button>
+    </div>
+  </div>
+</dialog>
+<script src="i18n.js"></script>
+<script src="signal.js"></script>
+<script src="transfer.js"></script>
+<script src="inicio.js"></script>
+</body>
+</html>

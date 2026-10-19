@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src ws: wss:; style-src 'self' 'unsafe-inline'; media-src blob: mediastream:">
+<title>Sesión</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { height: 100vh; display: flex; flex-direction: column; background: var(--night); color: #fff; }
+  :focus-visible { outline-color: var(--cable); }
+  .bar { min-height: 48px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 6px 12px; }
+  .bar .dot::before, .bar .dot::after { background: var(--cable); }
+  .bar .dot i { border-top: 4px solid var(--cable); }
+  #net { flex: 1; font-size: 14px; color: #C9CFD5; }
+  .bar button { height: 34px; padding: 0 12px; border: 1.5px solid #8C96A1; border-radius: 6px; background: transparent; color: #fff; font-size: 14px; }
+  .bar button[aria-pressed="true"] { border-color: var(--cable); background: var(--cable); color: var(--ink); font-weight: 700; }
+  .bar #cut { border: 0; background: #fff; color: var(--ink); font-weight: 700; margin-left: 8px; }
+  .filebar { display: flex; gap: 12px; align-items: baseline; padding: 0 12px 8px; font-size: 14px; color: #C9CFD5; }
+  .filebar button { border: 0; background: none; padding: 0; color: var(--cable); text-decoration: underline; font-size: 14px; }
+  #stage { flex: 1; min-height: 0; overflow: auto; display: flex; position: relative; }
+  video { margin: auto; display: block; cursor: default; }
+  #stage.fit video { width: 100%; height: 100%; object-fit: contain; }
+  /* La entrada se maneja sobre el video de abajo; esta capa solo muestra el escritorio protegido */
+  #secure { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; pointer-events: none; z-index: 2; }
+
+  .panel { margin: auto; width: min(520px, 100% - 32px); background: var(--paper); color: var(--ink); border-radius: 8px; padding: 32px; display: flex; flex-direction: column; gap: 22px; }
+  .panel h1 { margin: 0; font-size: 26px; }
+  .panel p { margin: 0; line-height: 1.5; }
+  #why { font-weight: 700; font-size: 18px; }
+  .panel .primary { align-self: flex-start; }
+</style>
+</head>
+<body>
+<div id="bar" class="bar" hidden>
+  <span class="dot" aria-hidden="true"><i></i></span>
+  <span id="net" data-i18n="connected">Conectado</span>
+  <button id="fit" aria-pressed="true" data-i18n="fit">Ajustar a la ventana</button>
+  <button id="real" aria-pressed="false" data-i18n="real">Tamaño real</button>
+  <button id="full" data-i18n="full">Pantalla completa</button>
+  <button id="sendFile" title="También puedes soltar archivos sobre la pantalla" data-i18n="sendFile" data-i18n-title="sendFileTip">Enviar archivo</button>
+  <button id="win" title="Abre el menú Inicio de la otra PC" data-i18n="winKey" data-i18n-title="winKeyTip">Tecla Windows</button>
+  <button id="cut" data-i18n="cut">Cortar conexión</button>
+  <input id="filePick" type="file" multiple hidden>
+</div>
+<div id="fileBar" class="filebar" aria-live="polite" hidden><span id="fileInfo"></span><button id="showFile" data-i18n="showFile" hidden>Ver en carpeta</button></div>
+<div id="stage" class="fit" hidden><video id="video" autoplay muted playsinline tabindex="0"></video><img id="secure" alt="" hidden></div>
+
+<div id="panel" class="panel" role="status">
+  <h1 id="title"></h1>
+  <div class="route" aria-hidden="true">
+    <div class="node"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"></rect><path d="M8 20h8M12 16v4"></path></svg>The Jr</div>
+    <div id="seg1" class="seg"></div>
+    <div id="nodeServer" class="node"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="1.5"></rect><rect x="4" y="13" width="16" height="7" rx="1.5"></rect><path d="M8 7.5h.01M8 16.5h.01"></path></svg><span data-i18n="server">Servidor</span></div>
+    <div id="seg2" class="seg"></div>
+    <div id="nodeRemote" class="node"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"></rect><path d="M8 20h8M12 16v4"></path></svg><span id="remoteName"></span></div>
+  </div>
+  <div>
+    <p id="why" data-i18n="connectingYourServer">Conectando con tu servidor…</p>
+    <p id="how" class="muted"></p>
+  </div>
+  <button id="retry" class="primary" data-i18n="retry" hidden>Volver a intentar</button>
+</div>
+<script src="i18n.js"></script>
+<script src="signal.js"></script>
+<script src="transfer.js"></script>
+<script src="session.js"></script>
+</body>
+</html>
