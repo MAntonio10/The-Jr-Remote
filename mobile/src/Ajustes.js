@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, C, F } from './ui';
+import { Button, C, F, RouteDot } from './ui';
 import { t } from './i18n';
 import { checkUpdates, repoUrl, version } from './acerca';
 
 const LANG_NAMES = { es: 'Español', en: 'English' }; // cada idioma con su propio nombre
 
-export default function Ajustes({ lang, onLang, onBack }) {
+export default function Ajustes({ lang, onLang, onBack, server, online, onServer }) {
+  const host = server.replace(/^wss?:\/\//, '');
   const [upd, setUpd] = useState(null); // resultado de la última búsqueda
   const [busy, setBusy] = useState(false);
 
@@ -43,7 +44,18 @@ export default function Ajustes({ lang, onLang, onBack }) {
         })}
       </View>
 
-      <View style={s.about}>
+      <View style={s.section}>
+        <Text style={s.label} accessibilityRole="header">{t('server')}</Text>
+        <View style={s.id}>
+          <RouteDot fail={online === false} />
+          <Text style={[s.result, { flex: 1 }, online === false && { color: C.fault }]}>
+            {!server ? t('setupServer') : online === false ? t('serverDown', { host }) : online ? t('serverUp', { host }) : t('connectingYourServer')}
+          </Text>
+        </View>
+        <Button kind="ghost" title={t('changeServer')} onPress={onServer} style={{ alignSelf: 'flex-start' }} />
+      </View>
+
+      <View style={s.section}>
         <Text style={s.label} accessibilityRole="header">{t('about')}</Text>
         <View style={s.id}>
           <Image source={require('../assets/icon.png')} style={s.logo} accessibilityIgnoresInvertColors />
@@ -84,7 +96,7 @@ const s = StyleSheet.create({
   lang: { flex: 1, minHeight: 48, borderWidth: 1.5, borderColor: C.ink, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   langOn: { backgroundColor: C.cable, borderColor: C.cable },
   langText: { fontFamily: F.regular, fontSize: 16, color: C.ink },
-  about: { marginTop: 28, paddingTop: 20, borderTopWidth: 1, borderColor: C.rule, gap: 12 },
+  section: { marginTop: 28, paddingTop: 20, borderTopWidth: 1, borderColor: C.rule, gap: 12 },
   id: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   logo: { width: 64, height: 64, borderRadius: 32 },
   name: { fontFamily: F.bold, fontSize: 20, color: C.ink },

@@ -16,6 +16,7 @@ export default function App() {
   const [fonts] = useFonts({ AtkinsonHyperlegibleNext_400Regular, AtkinsonHyperlegibleNext_700Bold, AtkinsonHyperlegibleMono_400Regular });
   const [devices, setDevices] = useState(null); // [{ id, name, password }] en almacenamiento cifrado
   const [server, setServer] = useState('');
+  const [online, setOnline] = useState(null); // estado del servidor: lo mide Equipos y lo muestra Configuración
   const [screen, setScreen] = useState({ name: 'equipos' });
   const [lang, setLangState] = useState(null);
 
@@ -56,7 +57,7 @@ export default function App() {
   if (screen.name === 'sesion') {
     content = <Sesion target={screen.target} server={server} onExit={home} />;
   } else if (screen.name === 'ajustes') {
-    content = <Ajustes lang={lang} onLang={changeLang} onBack={home} />;
+    content = <Ajustes lang={lang} onLang={changeLang} onBack={home} server={server} online={online} onServer={() => setScreen({ name: 'servidor' })} />;
   } else if (screen.name === 'servidor') {
     content = (
       <Servidor
@@ -70,12 +71,12 @@ export default function App() {
       <Equipos
         devices={devices}
         server={server}
+        onOnline={setOnline}
         onConnect={(target) => setScreen(server ? { name: 'sesion', target } : { name: 'servidor' })}
         onSubmit={(target) => {
           if (target.name) saveDevices([...devices.filter((d) => d.id !== target.id), target]);
           setScreen(server ? { name: 'sesion', target } : { name: 'servidor' });
         }}
-        onServer={() => setScreen({ name: 'servidor' })}
         onSettings={() => setScreen({ name: 'ajustes' })}
         onRemove={(id) => saveDevices(devices.filter((d) => d.id !== id))}
       />

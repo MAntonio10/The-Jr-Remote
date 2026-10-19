@@ -1,6 +1,6 @@
 {
   "name": "the-jr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "El Senior y The Jr: escritorio remoto propio",
   "main": "main.js",
   "scripts": {

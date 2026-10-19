@@ -56,12 +56,14 @@ export function formatWhen(ts) {
 export function connectSignal(url, onMessage, onState) {
   let ws, delay = 1000, closed = false;
   const open = () => {
+    if (closed) return;
     ws = new WebSocket(url);
     ws.onopen = () => { delay = 1000; onState(true); };
     ws.onmessage = (e) => onMessage(JSON.parse(e.data));
     ws.onclose = () => {
+      if (closed) return; // cierre pedido (salir de la pantalla): no es una caída del servidor
       onState(false);
-      if (!closed) setTimeout(open, delay);
+      setTimeout(open, delay);
       delay = Math.min(delay * 2, 30000);
     };
   };

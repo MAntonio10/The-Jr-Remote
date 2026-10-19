@@ -1,21 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Button, C, F, RouteDot, connectSignal, formatCode, formatWhen } from './ui';
 import { Field } from './Formulario';
 import { t } from './i18n';
 
-// Pantalla principal, con la misma estructura que en desktop: logo, "Ser The Jr de otro equipo", "Mis equipos" y el estado del servidor
-export default function Equipos({ devices, server, onConnect, onSubmit, onServer, onSettings, onRemove }) {
+// El círculo de recarga queda bajo la barra de estado, lejos del agujero de la cámara
+const SPINNER_TOP = (StatusBar.currentHeight ?? 24) + 24;
+
+// Pantalla principal: logo, "Ser The Jr de otro equipo" y "Mis equipos". El estado del servidor se ve en Configuración
+export default function Equipos({ devices, server, onOnline: setOnline, onConnect, onSubmit, onSettings, onRemove }) {
   const [statuses, setStatuses] = useState({});
-  const [online, setOnline] = useState(null); // null = todavía no se sabe
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [tick, setTick] = useState(0); // deslizar hacia abajo: reconectar y volver a consultar
+  const [refreshing, setRefreshing] = useState(false);
 
   // Conexión al servidor: muestra si responde y consulta si cada equipo guardado está en línea
   useEffect(() => {
     setOnline(null);
+    const state = (v) => { setOnline(v); setRefreshing(false); };
     if (!server) return;
     const ask = () => devices.forEach((d) => sig.send({ t: 'status', id: d.id }));
     let sig;
@@ -23,14 +28,16 @@ export default function Equipos({ devices, server, onConnect, onSubmit, onServer
       sig = connectSignal(server, (m) => {
         if (m.t === 'hello') ask();
         if (m.t === 'status') setStatuses((s) => ({ ...s, [m.id]: m }));
-      }, setOnline);
+      }, state);
     } catch {
-      setOnline(false); // dirección inválida
+      state(false); // dirección inválida
       return;
     }
     const timer = setInterval(ask, 30000);
     return () => { clearInterval(timer); sig.close(); };
-  }, [server, devices]);
+  }, [server, devices, setOnline, tick]);
+
+  const refresh = () => { setRefreshing(!!server); setStatuses({}); setTick((n) => n + 1); };
 
   const submit = () => {
     const id = code.replace(/\D/g, '');
@@ -45,10 +52,10 @@ export default function Equipos({ devices, server, onConnect, onSubmit, onServer
       { text: t('remove'), style: 'destructive', onPress: () => onRemove(d.id) },
     ]);
 
-  const host = server.replace(/^wss?:\/\//, '');
-
   return (
-    <ScrollView style={s.screen} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+    <ScrollView style={s.screen} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} colors={[C.ink]} progressBackgroundColor={C.cable} progressViewOffset={SPINNER_TOP} />}
+    >
       <View style={s.head}>
         <Image source={require('../assets/icon.png')} style={s.logo} accessibilityLabel="The Jr" accessibilityIgnoresInvertColors />
         <Button kind="ghost" title={t('settings')} onPress={onSettings} style={s.settings} textStyle={s.settingsText} />
@@ -98,15 +105,6 @@ export default function Equipos({ devices, server, onConnect, onSubmit, onServer
         })}
       </View>
 
-      <Pressable onPress={onServer} accessibilityRole="button" accessibilityHint={t('changeServer')} style={s.server}>
-        <RouteDot fail={online === false} />
-        <View style={{ flex: 1 }}>
-          <Text style={[s.serverTitle, online === false && { color: C.fault }]}>
-            {!server ? t('setupServer') : online === false ? t('serverDown', { host }) : online ? t('serverUp', { host }) : t('connectingYourServer')}
-          </Text>
-          <Text style={s.serverText}>{t('changeServer')}</Text>
-        </View>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -130,7 +128,4 @@ const s = StyleSheet.create({
   code: { fontFamily: F.regular, fontSize: 15, color: C.muted, fontVariant: ['tabular-nums'] },
   statusLine: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   status: { fontFamily: F.regular, fontSize: 14, color: C.ink },
-  server: { marginTop: 'auto', paddingTop: 24, flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
-  serverTitle: { fontFamily: F.bold, fontSize: 15, color: C.ink },
-  serverText: { fontFamily: F.regular, fontSize: 13, color: C.muted, textDecorationLine: 'underline' },
 });

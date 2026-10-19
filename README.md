@@ -91,6 +91,7 @@ En Windows lo recibido queda en `Descargas\The Jr`.
 El botón **Configuración** (arriba a la derecha en Windows, junto a "Mis equipos" en Android) permite:
 
 - **Idioma:** español o inglés. La primera vez se usa el idioma del sistema.
+- **Servidor:** dirección y estado de la conexión, con "Cambiar servidor". En Android, deslizar hacia abajo en "Mis equipos" reconecta y vuelve a consultar los equipos.
 - **Acerca de:** nombre, logo, versión y enlace al repositorio.
 - **Buscar actualizaciones:** consulta el último Release del repositorio en GitHub. Si hay una versión nueva, muestra "Descargar", que abre la página del Release. No instala nada por su cuenta.
 
