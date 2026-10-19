@@ -114,3 +114,12 @@ Los avisos de UAC y la pantalla de bloqueo sí se controlan: el instalador agreg
 [AGPL-3.0](LICENSE). Puedes usar, modificar y compartir The Jr libremente. Si ofreces una versión modificada
 como servicio (por ejemplo, tu propio servidor para otras personas), debes publicar el código de esos cambios
 con la misma licencia.
+
+## Créditos
+
+Desarrollado por **StayCloud**.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="logo/staycloud-dark.svg">
+  <img src="logo/staycloud.svg" alt="StayCloud" height="40">
+</picture>
