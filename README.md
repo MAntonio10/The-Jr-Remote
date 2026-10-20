@@ -118,9 +118,4 @@ con la misma licencia.
 
 ## Créditos
 
-Desarrollado por **StayCloud**.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="logo/staycloud-dark.svg">
-  <img src="logo/staycloud.svg" alt="StayCloud" height="40">
-</picture>
+Desarrollado por **Manuel Castellanos**.
