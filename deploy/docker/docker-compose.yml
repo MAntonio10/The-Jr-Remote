@@ -12,6 +12,7 @@ services:
       HOST: 127.0.0.1
       PORT: 8080
       TURN_HOST: turn.${DOMINIO}
+      PUBLIC_HOST: remoto.${DOMINIO}
       TURN_SECRET: ${TURN_SECRET}
       DB_FILE: /data/agents.json
     volumes: ["datos:/data"]

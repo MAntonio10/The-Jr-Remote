@@ -8,6 +8,7 @@ const { WebSocketServer } = require('ws');
 
 const TURN_SECRET = process.env.TURN_SECRET; // igual a static-auth-secret de coturn
 const TURN_HOST = process.env.TURN_HOST; // p. ej. turn.tudominio.com
+const PUBLIC_HOST = process.env.PUBLIC_HOST; // host de señalización (p. ej. remoto.tudominio.com): el relay 443 también se ofrece aquí
 const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'agents.json');
 const MAX_CONNECTS_PER_MIN = 10;
 const MAX_NEW_IDS_PER_HOUR = 5; // registros de códigos nuevos por IP
@@ -20,9 +21,13 @@ function iceServers(sid) {
   // Credenciales temporales (TURN REST API): válidas 12 h
   const username = `${Math.floor(Date.now() / 1000) + 12 * 3600}:${sid}`;
   const credential = crypto.createHmac('sha1', TURN_SECRET).update(username).digest('base64');
+  // turns 443: relay por TLS. Se ofrece también bajo el host de señalización (mismo 443, se
+  // distingue por ALPN en nginx) porque algunos firewall filtran por nombre y solo dejan pasar ese.
+  const tls = [`turns:${TURN_HOST}:443?transport=tcp`];
+  if (PUBLIC_HOST && PUBLIC_HOST !== TURN_HOST) tls.push(`turns:${PUBLIC_HOST}:443?transport=tcp`);
   return [
     { urls: `stun:${TURN_HOST}:3478` },
-    { urls: [`turn:${TURN_HOST}:3478?transport=udp`, `turns:${TURN_HOST}:443?transport=tcp`], username, credential },
+    { urls: [`turn:${TURN_HOST}:3478?transport=udp`, ...tls], username, credential },
   ];
 }
 
